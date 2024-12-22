@@ -1,7 +1,2 @@
-function welcome() {
-    const user = {
-        name: 'TypeScript',
-    };
-    return user.name;
-}
-welcome();
+import { Config } from './config';
+console.log(Config);
