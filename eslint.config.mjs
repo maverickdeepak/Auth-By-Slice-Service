@@ -15,9 +15,9 @@ export default tseslint.config(
         },
         rules: {
             'no-unused-vars': 'error',
-            'no-console': 'off',
+            'no-console': 'error',
             'dot-notation': 'error',
-        }
+        },
     },
     {
         ignores: ['dist/**', 'node_modules/**', 'eslint.config.mjs'],
