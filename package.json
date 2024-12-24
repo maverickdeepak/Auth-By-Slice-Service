@@ -11,7 +11,7 @@
         "lint:fix": "eslint . --fix",
         "test": "echo \"Error: no test specified\" && exit 1",
         "prepare": "husky",
-        "coverage": "jest coverage",
+        "coverage": "jest coverage --detectOpenHandles",
         "start": "ts-node src/index.ts",
         "typeorm": "typeorm-ts-node-commonjs"
     },
