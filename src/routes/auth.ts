@@ -3,6 +3,7 @@ import { AuthController } from '../controllers/AuthController';
 import { UserService } from '../services/UserService';
 import { AppDataSource } from '../config/data-source';
 import { User } from '../entity/User';
+import { logger } from '../config/logger';
 
 const router = Router();
 
@@ -13,7 +14,7 @@ const userRepository = AppDataSource.getRepository(User);
 const userService = new UserService(userRepository);
 
 // Initialize an instance of the AuthController and inject the UserService as a dependency
-const authController = new AuthController(userService);
+const authController = new AuthController(userService, logger);
 
 // Define a POST route for user registration and delegate the request handling to the AuthController's register method
 router.post('/register', (req, res, next) =>
