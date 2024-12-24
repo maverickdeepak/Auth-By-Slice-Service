@@ -78,6 +78,26 @@ describe('register user block - POST - /auth/register', () => {
             expect(users[0].lastName).toBe('Doe');
             expect(users[0].email).toBe('johndoe@gmail.com');
         });
+
+        it("should return the ID of the newly created user", async () => {
+            const userData = {
+                firstName: 'John',
+                lastName: 'Doe',
+                email: 'johndoe@gmail.com',
+                password: 'password',
+            };
+
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-expect-error
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
+            await request(app).post('/auth/register').send(userData);
+
+            // Retrieve the user data from the database
+            const userRepository = connection.getRepository(User);
+            const users = await userRepository.find();
+            expect(users.length).toBe(1);
+            expect(users[0].id).toBeDefined();
+        })
     });
 
     describe('Sad path', () => {

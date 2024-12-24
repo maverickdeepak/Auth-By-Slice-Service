@@ -16,7 +16,9 @@ const userService = new UserService(userRepository);
 const authController = new AuthController(userService);
 
 // Define a POST route for user registration and delegate the request handling to the AuthController's register method
-router.post('/register', (req, res) => authController.register(req, res));
+router.post('/register', (req, res, next) =>
+    authController.register(req, res, next)
+);
 
 // Export the configured router so it can be used in other parts of the application
 export default router;
