@@ -140,6 +140,26 @@ describe('register user block - POST - /auth/register', () => {
             expect(users[0].password).toHaveLength(60);
             expect(users[0].password).toMatch(/^\$2b\$\d+\$/);
         });
+
+        it("should return a 400 error if the user already exists", async () => {
+            const userData = {
+                firstName: 'John',
+                lastName: 'Doe',
+                email: 'johndoe@gmail.com',
+                password: 'password',
+            };
+
+            const userRepository = connection.getRepository(User);
+            await userRepository.save({ ...userData, role: Roles.CUSTOMER });
+
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-expect-error
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
+            const response = await request(app).post('/auth/register').send(userData);
+            const users = await userRepository.find();
+            expect(response.statusCode).toBe(400);
+            expect(users.length).toBe(1);
+        })
     });
 
     describe('Sad path', () => {

@@ -9,6 +9,13 @@ export class UserService {
     constructor(private userRepository: Repository<User>) {}
     // Method to create a new user in the database
     async createUser({ firstName, lastName, email, password }: UserData) {
+        // check if user already exist
+        const isUserExists = await this.userRepository.findOne({
+            where: { email: email },
+        });
+        if (isUserExists) {
+            throw createHttpError(400, 'User already exists.');
+        }
         // hash the password
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(password, saltRounds);
