@@ -3,7 +3,7 @@ import app from '../../src/app';
 import { DataSource } from 'typeorm';
 import { User } from '../../src/entity/User';
 import { AppDataSource } from '../../src/config/data-source';
-import { truncateTable } from '../utils';
+import { Roles } from '../../src/constants';
 
 describe('register user block - POST - /auth/register', () => {
     let connection: DataSource;
@@ -14,9 +14,9 @@ describe('register user block - POST - /auth/register', () => {
     });
 
     beforeEach(async () => {
-        // await connection.dropDatabase(); // Drops all data and structure
-        // await connection.synchronize(); // Recreates the database structure
-        await truncateTable(connection)
+        await connection.dropDatabase(); // Drops all data and structure
+        await connection.synchronize(); // Recreates the database structure
+        // await truncateTable(connection)
     });
 
     afterAll(async () => {
@@ -97,7 +97,27 @@ describe('register user block - POST - /auth/register', () => {
             const users = await userRepository.find();
             expect(users.length).toBe(1);
             expect(users[0].id).toBeDefined();
-        })
+        });
+
+        it("should assign a customer role to the newly created user", async () => {
+            const userData = {
+                firstName: 'John',
+                lastName: 'Doe',
+                email: 'johndoe@gmail.com',
+                password: 'password',
+            };
+
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-expect-error
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
+            await request(app).post('/auth/register').send(userData);
+
+            // Retrieve the user data from the database
+            const userRepository = connection.getRepository(User);
+            const users = await userRepository.find();
+            expect(users[0]).toHaveProperty('role')
+            expect(users[0].role).toEqual(Roles.CUSTOMER)
+        });
     });
 
     describe('Sad path', () => {
