@@ -118,6 +118,28 @@ describe('register user block - POST - /auth/register', () => {
             expect(users[0]).toHaveProperty('role')
             expect(users[0].role).toEqual(Roles.CUSTOMER)
         });
+
+        it("should store he hashed password in the database", async () => {
+            const userData = {
+                firstName: 'John',
+                lastName: 'Doe',
+                email: 'johndoe@gmail.com',
+                password: 'password',
+            };
+
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-expect-error
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
+            await request(app).post('/auth/register').send(userData);
+
+            // Retrieve the user data from the database
+            const userRepository = connection.getRepository(User);
+            const users = await userRepository.find();
+            expect(users[0]).toHaveProperty('password');
+            expect(users[0].password).not.toBe(userData.password);
+            expect(users[0].password).toHaveLength(60);
+            expect(users[0].password).toMatch(/^\$2b\$\d+\$/);
+        });
     });
 
     describe('Sad path', () => {
