@@ -10,7 +10,8 @@ export class UserService {
     // Method to create a new user in the database
     async createUser({ firstName, lastName, email, password }: UserData) {
         // hash the password
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
         try {
             // Save the new user data in the repository
             return await this.userRepository.save({
