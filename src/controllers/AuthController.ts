@@ -3,7 +3,7 @@ import express from 'express';
 import { RegisterUserRequest } from '../types';
 import { UserService } from '../services/UserService';
 import { Logger } from 'winston';
-import createHttpError from 'http-errors';
+import { validationResult } from 'express-validator';
 
 export class AuthController {
     // Initialize the AuthController with a UserService instance and logger
@@ -18,13 +18,16 @@ export class AuthController {
         res: express.Response,
         next: express.NextFunction
     ) {
-        // Extract user data from the request body
-        const { firstName, lastName, email, password } = req.body;
-        if (!email) {
-            const err = createHttpError(400, 'Email is required.');
-            next(err);
+        const result = validationResult(req);
+        if (!result.isEmpty()) {
+            res.status(400).json({
+                errors: result.array(),
+            });
             return;
         }
+
+        // Extract user data from the request body
+        const { firstName, lastName, email, password } = req.body;
         this.logger.debug(`Received user registration request for ${email}`, {
             firstName,
             lastName,

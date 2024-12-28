@@ -175,6 +175,10 @@ describe('register user block - POST - /auth/register', () => {
             // @ts-expect-error
             // eslint-disable-next-line @typescript-eslint/no-misused-promises
             const response = await request(app).post('/auth/register').send(userData);
+            // Retrieve the user data from the database
+            const userRepository = connection.getRepository(User);
+            const users = await userRepository.find();
+            expect(users.length).toBe(0);
             expect(response.statusCode).toBe(400);
         })
     });
