@@ -163,5 +163,19 @@ describe('register user block - POST - /auth/register', () => {
     });
 
     describe('Sad path', () => {
+        it("should return 400 if the user's email is invalid", async () => {
+            const userData = {
+                firstName: 'John',
+                lastName: 'Doe',
+                email: '',
+                password: 'password',
+            };
+
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-expect-error
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
+            const response = await request(app).post('/auth/register').send(userData);
+            expect(response.statusCode).toBe(400);
+        })
     });
 });

@@ -13,6 +13,7 @@ export class User {
 
     @Column({
         unique: true,
+        nullable: false,
     })
     email: string;
 
