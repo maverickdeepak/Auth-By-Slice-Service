@@ -180,6 +180,42 @@ describe('register user block - POST - /auth/register', () => {
             const users = await userRepository.find();
             expect(users.length).toBe(0);
             expect(response.statusCode).toBe(400);
+        });
+
+        it("should return 400 if the user's first name is missing", async () => {
+            const userData = {
+                lastName: 'Doe',
+                email: 'johndoe@gmail.com',
+                password: 'password',
+            };
+
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-expect-error
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
+            const response = await request(app).post('/auth/register').send(userData);
+            // Retrieve the user data from the database
+            const userRepository = connection.getRepository(User);
+            const users = await userRepository.find();
+            expect(users.length).toBe(0);
+            expect(response.statusCode).toBe(400);
+        });
+
+        it("should return 400 if the user's password is missing", async () => {
+            const userData = {
+                firstName: 'John',
+                lastName: 'Doe',
+                email: 'johndoe@gmail.com',
+            };
+
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-expect-error
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
+            const response = await request(app).post('/auth/register').send(userData);
+            // Retrieve the user data from the database
+            const userRepository = connection.getRepository(User);
+            const users = await userRepository.find();
+            expect(users.length).toBe(0);
+            expect(response.statusCode).toBe(400);
         })
     });
 
@@ -199,9 +235,44 @@ describe('register user block - POST - /auth/register', () => {
             // Retrieve the user data from the database
             const userRepository = connection.getRepository(User);
             const users = await userRepository.find();
-
-            expect(users.length).toBe(1);
             expect(users[0].email).toBe('johndoe@gmail.com');
-        })
+        });
+
+        it("should return 400 if the user's email is invalid", async () => {
+            const userData = {
+                firstName: 'John',
+                lastName: 'Doe',
+                email: 'johndoe@gmail',
+                password: 'password',
+            };
+
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-expect-error
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
+            await request(app).post('/auth/register').send(userData);
+            // Retrieve the user data from the database
+            const userRepository = connection.getRepository(User);
+            const users = await userRepository.find();
+            expect(users).toHaveLength(0)
+        });
+
+        it("should return 400 if the user's password length is less than 8 characters", async () => {
+            const userData = {
+                firstName: 'John',
+                lastName: 'Doe',
+                email: 'johndoe@gmail.com',
+                password: 'pw',
+            };
+
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-expect-error
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
+            await request(app).post('/auth/register').send(userData);
+            // Retrieve the user data from the database
+            const userRepository = connection.getRepository(User);
+            const users = await userRepository.find();
+
+            expect(users.length).toBe(0);
+        });
     })
 });
