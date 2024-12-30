@@ -5,6 +5,9 @@ import { User } from '../../src/entity/User';
 import { AppDataSource } from '../../src/config/data-source';
 import { Roles } from '../../src/constants';
 
+import { isJwt } from '../utils';
+
+
 describe('register user block - POST - /auth/register', () => {
     let connection: DataSource;
 
@@ -159,7 +162,50 @@ describe('register user block - POST - /auth/register', () => {
             const users = await userRepository.find();
             expect(response.statusCode).toBe(400);
             expect(users.length).toBe(1);
-        })
+        });
+
+        it("should return the access token and refresh token inside a cookie", async () => {
+            const userData = {
+                firstName: 'John',
+                lastName: 'Doe',
+                email: 'johndoe@gmail.com',
+                password: 'password',
+            };
+
+            const userRepository = connection.getRepository(User);
+            await userRepository.save({ ...userData, role: Roles.CUSTOMER });
+
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-expect-error
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
+            const response = await request(app).post('/auth/register').send(userData);
+            let accessToken:string = '';
+            let refreshToken:string = '';
+            // Safely handle the 'set-cookie' header type
+            const setCookieHeader = response.headers['set-cookie'] || []; // Might be string or undefined
+
+            // Ensure it's an array of strings
+            const cookies: string[] = Array.isArray(setCookieHeader)
+                ? setCookieHeader
+                : [setCookieHeader].filter(Boolean); // If it's a string or undefined, normalize it to an array
+            cookies.forEach(cookie => {
+                if(cookie.startsWith('accessToken=')) {
+                    accessToken = cookie.split(';')[0].split('=')[1];
+                }
+                if(cookie.startsWith('refreshToken=')) {
+                    refreshToken = cookie.split(';')[0].split('=')[1];
+                }
+            });
+            expect(accessToken).toBeDefined();
+            expect(refreshToken).toBeDefined();
+            expect(isJwt(accessToken)).toBe(true);
+            // expect(accessToken).not.toBe('');
+            // expect(refreshToken).not.toBe('');
+            // expect(accessToken).toHaveLength(100);
+            // expect(refreshToken).toHaveLength(100);
+            // expect(accessToken).toMatch(/^\w+\.?\w*$/);
+            // expect(refreshToken).toMatch(/^\w+\.?\w*$/);
+        });
     });
 
     describe('Sad path', () => {

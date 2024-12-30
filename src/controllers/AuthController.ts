@@ -43,6 +43,26 @@ export class AuthController {
             });
 
             this.logger.info(`User ${email} created successfully.`);
+            const accessToken = 'accessToken=helloworld';
+            const refreshToken = 'refreshToken=helloworld';
+
+            res.cookie('accessToken', accessToken, {
+                domain: 'localhost',
+                sameSite: 'strict',
+                maxAge: 1000 * 60 * 60,
+                httpOnly: true,
+                secure: false,
+                path: '/',
+            });
+
+            res.cookie('refreshToken', refreshToken, {
+                domain: 'localhost',
+                sameSite: 'strict',
+                maxAge: 1000 * 60 * 60 * 24 * 30,
+                httpOnly: true,
+                secure: false,
+                path: '/',
+            });
             // Return a success response with status 201
             res.status(201).json({
                 message: 'User created successfully',
