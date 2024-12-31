@@ -1,9 +1,12 @@
 import express from 'express';
-
+import { JwtPayload, sign } from 'jsonwebtoken';
 import { RegisterUserRequest } from '../types';
 import { UserService } from '../services/UserService';
 import { Logger } from 'winston';
 import { validationResult } from 'express-validator';
+import * as fs from 'node:fs';
+import path from 'node:path';
+import createHttpError from 'http-errors';
 
 export class AuthController {
     // Initialize the AuthController with a UserService instance and logger
@@ -35,7 +38,7 @@ export class AuthController {
         });
         try {
             // Call the UserService to create a new user in the database
-            await this.userService.createUser({
+            const user = await this.userService.createUser({
                 firstName,
                 lastName,
                 email,
@@ -43,7 +46,30 @@ export class AuthController {
             });
 
             this.logger.info(`User ${email} created successfully.`);
-            const accessToken = 'accessToken=helloworld';
+            let privateKey: Buffer;
+            try {
+                privateKey = fs.readFileSync(
+                    path.resolve(__dirname, '../../certs/private.pem')
+                );
+            } catch (err) {
+                console.error(err);
+                const error = createHttpError(
+                    500,
+                    'Failed to load private key.'
+                );
+                next(error);
+                return;
+            }
+            const payload: JwtPayload = {
+                sub: String(user.id),
+                role: user.role,
+            };
+            const accessToken = sign(payload, privateKey, {
+                expiresIn: '1h',
+                algorithm: 'RS256',
+                issuer: 'auth-service',
+            });
+
             const refreshToken = 'refreshToken=helloworld';
 
             res.cookie('accessToken', accessToken, {

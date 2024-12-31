@@ -19,6 +19,7 @@ export const isJwt = (token: string): boolean => {
         parts.forEach(part => Buffer.from(part, 'base64').toString('utf-8'));
         return true;
     } catch (e) {
+        console.log(e);
         return false;
     }
 }
