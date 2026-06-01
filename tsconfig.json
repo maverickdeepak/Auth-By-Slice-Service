@@ -111,5 +111,7 @@
         "skipLibCheck": true /* Skip type checking all .d.ts files. */,
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true
-    }
+    },
+    "include": ["src/**/*"],
+    "exclude": ["coverage", "node_modules"]
 }

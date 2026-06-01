@@ -10,3 +10,15 @@ export interface UserData {
 export interface RegisterUserRequest extends express.Request {
     body: UserData;
 }
+
+export interface LoginUserRequest extends express.Request {
+    body: {
+        email: string;
+        password: string;
+    };
+}
+
+export interface TokenPayload {
+    sub: string;
+    role: string;
+}

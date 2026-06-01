@@ -12,6 +12,7 @@ const DB_PORT = process.env.DB_PORT;
 const DB_USERNAME = process.env.DB_USERNAME;
 const DB_PASSWORD = process.env.DB_PASSWORD;
 const DB_NAME = process.env.DB_NAME;
+const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET;
 
 export const Config = Object.freeze({
     PORT,
@@ -21,4 +22,5 @@ export const Config = Object.freeze({
     DB_USERNAME,
     DB_PASSWORD,
     DB_NAME,
+    REFRESH_TOKEN_SECRET,
 });

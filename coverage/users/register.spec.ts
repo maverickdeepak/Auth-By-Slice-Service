@@ -1,9 +1,12 @@
+import {Express, response} from 'express';
 import request from 'supertest';
 import app from '../../src/app';
 import { DataSource } from 'typeorm';
 import { User } from '../../src/entity/User';
 import { AppDataSource } from '../../src/config/data-source';
 import { Roles } from '../../src/constants';
+import { describe, beforeAll, beforeEach, afterAll, expect, it } from '@jest/globals';
+import { RefreshToken } from '../../src/entity/RefreshToken';
 
 // import { isJwt } from '../utils';
 
@@ -29,6 +32,10 @@ describe('register user block - POST - /auth/register', () => {
         // }
     });
 
+    afterAll(async () => {
+        await AppDataSource.destroy();
+    });
+
     describe('Happy path', () => {
         it('should return status code 201', async () => {
             const userData = {
@@ -39,9 +46,9 @@ describe('register user block - POST - /auth/register', () => {
             };
 
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-expect-error
+           
             // eslint-disable-next-line @typescript-eslint/no-misused-promises
-            const response = await request(app).post('/auth/register').send(userData);
+            const response = await request(app as any).post('/auth/register').send(userData);
             expect(response.status).toBe(201); // Verify status code
         });
 
@@ -54,9 +61,9 @@ describe('register user block - POST - /auth/register', () => {
             };
 
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-expect-error
+           
             // eslint-disable-next-line @typescript-eslint/no-misused-promises
-            const response = await request(app).post('/auth/register').send(userData);
+            const response = await request(app as any).post('/auth/register').send(userData);
             expect(response.type).toBe('application/json'); // Verify content type
         });
 
@@ -69,9 +76,9 @@ describe('register user block - POST - /auth/register', () => {
             };
 
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-expect-error
+           
             // eslint-disable-next-line @typescript-eslint/no-misused-promises
-            await request(app).post('/auth/register').send(userData);
+            await request(app as any).post('/auth/register').send(userData);
 
             // Retrieve the user data from the database
             const userRepository = connection.getRepository(User);
@@ -91,9 +98,9 @@ describe('register user block - POST - /auth/register', () => {
             };
 
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-expect-error
+           
             // eslint-disable-next-line @typescript-eslint/no-misused-promises
-            await request(app).post('/auth/register').send(userData);
+            await request(app as any).post('/auth/register').send(userData);
 
             // Retrieve the user data from the database
             const userRepository = connection.getRepository(User);
@@ -111,9 +118,9 @@ describe('register user block - POST - /auth/register', () => {
             };
 
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-expect-error
+           
             // eslint-disable-next-line @typescript-eslint/no-misused-promises
-            await request(app).post('/auth/register').send(userData);
+            await request(app as any).post('/auth/register').send(userData);
 
             // Retrieve the user data from the database
             const userRepository = connection.getRepository(User);
@@ -131,9 +138,9 @@ describe('register user block - POST - /auth/register', () => {
             };
 
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-expect-error
+           
             // eslint-disable-next-line @typescript-eslint/no-misused-promises
-            await request(app).post('/auth/register').send(userData);
+            await request(app as any).post('/auth/register').send(userData);
 
             // Retrieve the user data from the database
             const userRepository = connection.getRepository(User);
@@ -156,9 +163,9 @@ describe('register user block - POST - /auth/register', () => {
             await userRepository.save({ ...userData, role: Roles.CUSTOMER });
 
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-expect-error
+           
             // eslint-disable-next-line @typescript-eslint/no-misused-promises
-            const response = await request(app).post('/auth/register').send(userData);
+            const response = await request(app as any).post('/auth/register').send(userData);
             const users = await userRepository.find();
             expect(response.statusCode).toBe(400);
             expect(users.length).toBe(1);
@@ -176,9 +183,9 @@ describe('register user block - POST - /auth/register', () => {
             await userRepository.save({ ...userData, role: Roles.CUSTOMER });
 
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-expect-error
+           
             // eslint-disable-next-line @typescript-eslint/no-misused-promises
-            const response = await request(app).post('/auth/register').send(userData);
+            const response = await request(app as any).post('/auth/register').send(userData);
             let accessToken:string = '';
             let refreshToken:string = '';
             // Safely handle the 'set-cookie' header type
@@ -200,6 +207,28 @@ describe('register user block - POST - /auth/register', () => {
             expect(accessToken).toBeDefined();
             expect(refreshToken).toBeDefined();
         });
+
+        it("should store the refresh token in the database", async () => {
+            const userData = {
+                firstName: 'John',
+                lastName: 'Doe',
+                email: 'johndoe@gmail.com',
+                password: 'password',
+            };
+
+                const response = await request(app as any).post('/auth/register').send(userData);
+
+            const refreshTokenRepository =
+                connection.getRepository(RefreshToken);
+
+            const tokens = await refreshTokenRepository
+                .createQueryBuilder('refreshToken')
+                .where('refreshToken.userId = :userId', {
+                    userId: response.body.id,
+                }).getMany();
+
+            expect(tokens).toHaveLength(1);
+        })
     });
 
     describe('Sad path', () => {
@@ -212,9 +241,9 @@ describe('register user block - POST - /auth/register', () => {
             };
 
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-expect-error
+           
             // eslint-disable-next-line @typescript-eslint/no-misused-promises
-            const response = await request(app).post('/auth/register').send(userData);
+            const response = await request(app as any).post('/auth/register').send(userData);
             // Retrieve the user data from the database
             const userRepository = connection.getRepository(User);
             const users = await userRepository.find();
@@ -230,9 +259,9 @@ describe('register user block - POST - /auth/register', () => {
             };
 
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-expect-error
+           
             // eslint-disable-next-line @typescript-eslint/no-misused-promises
-            const response = await request(app).post('/auth/register').send(userData);
+            const response = await request(app as any).post('/auth/register').send(userData);
             // Retrieve the user data from the database
             const userRepository = connection.getRepository(User);
             const users = await userRepository.find();
@@ -248,9 +277,9 @@ describe('register user block - POST - /auth/register', () => {
             };
 
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-expect-error
+           
             // eslint-disable-next-line @typescript-eslint/no-misused-promises
-            const response = await request(app).post('/auth/register').send(userData);
+            const response = await request(app as any).post('/auth/register').send(userData);
             // Retrieve the user data from the database
             const userRepository = connection.getRepository(User);
             const users = await userRepository.find();
@@ -269,9 +298,9 @@ describe('register user block - POST - /auth/register', () => {
             };
 
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-expect-error
+           
             // eslint-disable-next-line @typescript-eslint/no-misused-promises
-            await request(app).post('/auth/register').send(userData);
+            await request(app as any).post('/auth/register').send(userData);
             // Retrieve the user data from the database
             const userRepository = connection.getRepository(User);
             const users = await userRepository.find();
@@ -287,9 +316,9 @@ describe('register user block - POST - /auth/register', () => {
             };
 
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-expect-error
+           
             // eslint-disable-next-line @typescript-eslint/no-misused-promises
-            await request(app).post('/auth/register').send(userData);
+            await request(app as any).post('/auth/register').send(userData);
             // Retrieve the user data from the database
             const userRepository = connection.getRepository(User);
             const users = await userRepository.find();
@@ -305,9 +334,9 @@ describe('register user block - POST - /auth/register', () => {
             };
 
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-expect-error
+           
             // eslint-disable-next-line @typescript-eslint/no-misused-promises
-            await request(app).post('/auth/register').send(userData);
+            await request(app as any).post('/auth/register').send(userData);
             // Retrieve the user data from the database
             const userRepository = connection.getRepository(User);
             const users = await userRepository.find();
